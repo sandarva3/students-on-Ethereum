@@ -16,7 +16,12 @@ contract StudentRecords{
     }
     mapping(uint => Student) students; //To map each id to student, automatically stored on storage.
     uint public studentCount;//Global variable, automatically stored on storage & assigned 0.
-    address _owner = msg.sender;
+    
+    address public _owner;
+
+    constructor(){
+        _owner = msg.sender;
+    }
 
 
     modifier onlyOwner {
@@ -33,12 +38,17 @@ contract StudentRecords{
     }
 
 
-
-    function registerStudent(string memory name, uint rollno, uint sem, address key) public returns(bool){
+    function registerStudent(string memory name, uint rollno, uint sem, address key) public onlyOwner returns(bool){
         studentCount++;
-        students[studentCount] = Student(studentCount, name, rollno, sem,"", 0, key, true);
-        students[studentCount].grade[sem] = "";
-        return true;
+        require(!students[studentCount].isRegistered, "The Student already exist.");
+
+        students[studentCount].id = studentCount;
+        students[studentCount].name = name;
+        students[studentCount].rollNo = rollno;
+        students[studentCount].semester = sem;
+        students[studentCount].attendance = 0;
+        students[studentCount].studentWallet = key;
+        students[studentCount].isRegistered = true;
     }
 
     function getStudent(uint id) public view returns(string memory, uint, uint){
@@ -59,7 +69,7 @@ contract StudentRecords{
         return true;
     }
 
-    function updateSem(uint id, string memory sem) public onlyOwner checkStudent(id) returns(bool){
+    function updateSem(uint id, uint sem) public onlyOwner checkStudent(id) returns(bool){
         students[id].semester = sem;
         return true;
     }
@@ -70,7 +80,7 @@ contract StudentRecords{
     }
 
     function updateGrade(uint id, uint sem, string memory _grade) public onlyOwner checkStudent(id) returns(bool){
-        require(students[id].grade[sem], "No grade. First add grade");
+        require(bytes(students[id].grade[sem]).length != 0, "No grade. First add grade");
         students[id].grade[sem] = _grade;
         return true;
     }
