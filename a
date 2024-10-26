@@ -1,0 +1,1 @@
+- 'private' can't be accessed from derived contracts whereas 'internal' can be.
