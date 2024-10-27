@@ -37,6 +37,34 @@ contract StudentRecords{
         _;
     }
 
+    event studentRegistered(
+        uint id,
+        string name,
+        uint roll,
+        uint sem,
+        address walletKey
+        );
+    event nameUpdated(
+        uint id,
+        string oldName,
+        string newName
+    );
+    event rollUpdated(
+        uint id,
+        uint oldRoll,
+        uint newRoll
+    );
+    event semUpdated(
+        uint id,
+        uint oldSem,
+        uint newSem
+    );
+    event gradeUpdated(
+        uint id,
+        string oldGrade,
+        string newGrade
+    );
+
 
     function registerStudent(string memory name, uint rollno, uint sem, address key) public onlyOwner returns(uint, bool){
         require(checkAddress(key), "The provided wallet key already exist");
@@ -51,6 +79,7 @@ contract StudentRecords{
         students[studentCount].studentWallet = key;
         students[studentCount].isRegistered = true;
 
+        emit studentRegistered(studentCount, name, rollno, sem, key);
         return (studentCount, true);
     }
 
@@ -58,23 +87,50 @@ contract StudentRecords{
         return(students[id].name, students[id].rollNo, students[id].semester);
     }
 
-    //function getStudentFullInfo(uint id)
+    function getStudentFullInfo(uint id) public view onlyOwner checkStudent(id)
+    returns(
+        uint,
+        string memory,
+        uint,
+        uint,
+        string memory,
+        uint,
+        address,
+        bool
+    )
+    {
+         uint currentSem = students[id].semester;
+         return(
+            students[id].id,
+            students[id].name,
+            students[id].rollNo,
+            currentSem,
+            students[id].grade[currentSem],
+            students[id].attendance[currentSem],
+            students[id].studentWallet,
+            students[id].isRegistered
+         );
+    }
 
     function getWallet(uint id) public view returns(address){
         return(students[id].studentWallet);
     }
 
     function updateName(uint id, string memory name) public onlyOwner checkStudent(id) returns(bool){
+        emit nameUpdated(id, students[id].name, name);
         students[id].name = name;
         return true;
     }
 
     function updateRoll(uint id, uint roll) public onlyOwner checkStudent(id) returns(bool){
+        require(checkRoll(roll), "The Roll no already exist.");
+        emit rollUpdated(id, students[id].rollNo, roll);
         students[id].rollNo = roll;
         return true;
     }
 
     function updateSem(uint id, uint sem) public onlyOwner checkStudent(id) returns(bool){
+        emit semUpdated(id, students[id].semester, sem);
         students[id].semester = sem;
         return true;
     }
@@ -91,6 +147,7 @@ contract StudentRecords{
     //Semester wise grade
     function updateGrade(uint id, uint sem, string memory _grade) public onlyOwner checkStudent(id) returns(bool){
         require(bytes(students[id].grade[sem]).length != 0, "No grade. First add grade");
+        emit gradeUpdated(id, students[id].grade[sem], _grade);
         students[id].grade[sem] = _grade;
         return true;
     }
