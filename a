@@ -1,1 +1,4 @@
-- 'private' can't be accessed from derived contracts whereas 'internal' can be.
+- private visibility mode:  can't be accessed from even derived contracts whereas 'internal' can be.
+
+- bytes(): It converts the provided data to raw bytes. A byte is represented by hex value not binary. And bytes().length provides the length of that data in hex.
+        A character would have length of 1, a word of 5 character would have a length of 5.
