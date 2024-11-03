@@ -2,3 +2,6 @@
 
 - bytes(): It converts the provided data to raw bytes. A byte is represented by hex value not binary. And bytes().length provides the length of that data in hex.
         A character would have length of 1, a word of 5 character would have a length of 5.
+
+-payable: Using it in function allows it to receive ether. amount must be specified when calling that function. msg.value captures the amount. ether is sent to
+        contract's address.

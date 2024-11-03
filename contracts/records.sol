@@ -18,7 +18,7 @@ contract StudentRecords{
     uint public studentCount;//Global variable, automatically stored on storage & assigned 0.
     
     address public _owner;
-
+    mapping(uint => uint) maxAttendance;
     constructor(){
         _owner = msg.sender;
     }
@@ -64,6 +64,17 @@ contract StudentRecords{
         string oldGrade,
         string newGrade
     );
+    event deposited(
+        uint amount,
+        address from
+    );
+    event etherSent(
+        uint amount,
+        string name,
+        uint id,
+        address _address
+    );
+
 
 
     function registerStudent(string memory name, uint rollno, uint sem, address key) public onlyOwner returns(uint, bool){
@@ -195,5 +206,90 @@ contract StudentRecords{
         else{
             return true;
         }
+    }
+
+    function viewEther() public view onlyOwner returns(uint){
+        return address(this).balance;
+    }
+    
+    function deposit(uint amount) public payable onlyOwner returns(bool){ //In web3 js interface we specify value in calling deposit()
+        require(amount > 0, "Amount must be greater than zero");
+        emit deposited(amount, _owner);
+
+        return true;
+    }
+
+    function sendEther(uint amount, uint id) public onlyOwner returns(bool){
+        require(amount > 0, "Amount must be greater than zero");
+        require(address(this).balance > amount, "Insufficient balance in contract.");
+
+        address receiver = students[id].studentWallet;
+        (bool success, ) = receiver.call{value: amount} ("");
+        require(success, "Transfer failed");
+        emit etherSent(amount, students[id].name, id, receiver);
+
+        return true;
+    }
+
+    function setAttendance(uint value, uint sem) public onlyOwner returns(bool){
+        maxAttendance[sem] = value;
+        return true;
+    }
+
+    function sendPrize(uint id) public checkStudent(id) onlyOwner returns(bool){
+        address receiver = students[id].studentWallet;
+        require(address(this).balance > 5, "Insuffic")
+    }
+
+    function distributePrize(uint sem) public onlyOwner returns(bool){
+        require(maxAttendance[sem] > 0, "Max-Attendance for this semester is not set.")
+        uint[] boringStudents;
+        uint [] totalStudents;
+        for(uint i=1; i<=studentCount; i++){
+            uint _sem = students[i].semester;
+            if(_sem === sem){
+                totalStudents.push(id);
+            }
+        }
+
+        for(uint i=1; i<totalStudents.length; i++){
+            uint _attendance = students[i].attendance[sem];
+            if(_attendance === maxAttendance[sem]){
+                boringStudents.push(id);
+            }
+        }
+
+        uint requiredAmount = 5*()
+    }
+
+    function removeStudent(uint id) public checkStudent(id) returns(bool){
+    
+    }
+
+}
+
+
+library SafeMath { 
+    function sub(uint256 a, uint256 b) internal pure returns (uint256) {
+        assert(b <= a);
+        return a - b;
+    }
+
+    function add(uint256 a, uint256 b) internal pure returns (uint256) {
+        uint256 c = a + b;
+        assert(c >= a);
+        return c;
+    }
+
+    function mul(uint256 a, uint256 b) internal pure returns (uint256) {
+        // Gas optimization: this is cheaper than requiring 'a' not being zero, but the benefit
+        // is lost if 'b' is also tested.
+        if (a == 0) {
+            return 0;
+        }
+
+        uint256 c = a * b;
+        assert(c / a == b); // Ensures no overflow occurred
+        return c;
     }
 }
