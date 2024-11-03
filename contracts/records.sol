@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: SEE LICENSE IN LICENSE
+
 pragma solidity >= 0.8.0;
 
 contract StudentRecords{
-
+    using SafeMath for uint;
 
     struct Student {
         uint id;
@@ -236,30 +237,66 @@ contract StudentRecords{
         return true;
     }
 
-    function sendPrize(uint id) public checkStudent(id) onlyOwner returns(bool){
+    function sendPrize(uint id) internal{
         address receiver = students[id].studentWallet;
-        require(address(this).balance > 5, "Insuffic")
+        (bool success, ) = receiver.call{value: 5*1 ether} ("");
+        require(success, "Transfer Failed.");
     }
 
     function distributePrize(uint sem) public onlyOwner returns(bool){
-        require(maxAttendance[sem] > 0, "Max-Attendance for this semester is not set.")
-        uint[] boringStudents;
-        uint [] totalStudents;
-        for(uint i=1; i<=studentCount; i++){
+        require(maxAttendance[sem] > 0, "Max-Attendance for this semester is not set.");
+        uint count;
+        uint index;
+        for(uint i = 1; i <= studentCount; i++){
             uint _sem = students[i].semester;
-            if(_sem === sem){
-                totalStudents.push(id);
+            if(_sem == sem){
+                count += 1;
+              //  totalStudents.push(i);
             }
         }
 
-        for(uint i=1; i<totalStudents.length; i++){
-            uint _attendance = students[i].attendance[sem];
-            if(_attendance === maxAttendance[sem]){
-                boringStudents.push(id);
+        uint[] memory totalStudents = new uint[](count);
+
+        for(uint i = 1; i <= studentCount; i++){
+            uint _sem = students[i].semester;
+            if(_sem == sem){
+                totalStudents[index] = i;
+                index += 1;
             }
         }
 
-        uint requiredAmount = 5*()
+        count = 0;
+        index = 0;
+
+        for(uint i = 0; i < totalStudents.length; i++){
+            uint id = totalStudents[i];
+            uint _attendance = students[id].attendance[sem];
+            if(_attendance == maxAttendance[sem]){
+                count += 1;
+            }
+        }
+
+        uint[] memory boringStudents = new uint[](count);
+        for(uint i = 0; i < totalStudents.length; i++){
+            uint id = totalStudents[i];
+            uint _attendance = students[id].attendance[sem];
+            if(_attendance == maxAttendance[sem]){
+                boringStudents[index] = id;
+                index += 1;
+            }
+        }
+
+        uint totalBorers = boringStudents.length;
+        uint requiredAmount = totalBorers.mul(5*1 ether);
+
+        require(address(this).balance >= requiredAmount, "Insufficient Balance.");
+
+        for(uint i = 0; i < totalBorers; i++){
+            uint id = boringStudents[i];
+            sendPrize(id);
+        }
+
+        return true;
     }
 
     function removeStudent(uint id) public checkStudent(id) returns(bool){
