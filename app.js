@@ -3,23 +3,51 @@ const Web3 = require("web3");
 let web3;
 let studentRecords;
 
-// Connect directly to Ganache
 window.addEventListener("load", async () => {
-    web3 = new Web3("http://127.0.0.1:8545"); // Direct connection to Ganache RPC
+    web3 = new Web3("http://127.0.0.1:8545");
     
-    const contractAddress = "0x0457a80E41be16F7e858a591D626521c372d796f"; // Replace with your contract address
-    const contractABI = [/* ABI from StudentRecords.json */];
+    const contractAddress = "0x0457a80E41be16F7e858a591D626521c372d796f";
+    const contractABI = [
+        {
+            "inputs": [ 
+                { "internalType": "string", "name": "name", "type": "string" },
+                { "internalType": "uint256", "name": "rollno", "type": "uint256" },
+                { "internalType": "uint256", "name": "sem", "type": "uint256" },
+                { "internalType": "address", "name": "key", "type": "address" }
+            ],
+            "name": "registerStudent",
+            "outputs": [
+                { "internalType": "uint256", "name": "", "type": "uint256" },
+                { "internalType": "bool", "name": "", "type": "bool" }
+            ],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                { "internalType": "uint256", "name": "id", "type": "uint256" }
+            ],
+            "name": "getStudent",
+            "outputs": [
+                { "internalType": "string", "name": "", "type": "string" },
+                { "internalType": "uint256", "name": "", "type": "uint256" },
+                { "internalType": "uint256", "name": "", "type": "uint256" }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        }
+    ];
+    
 
     studentRecords = new web3.eth.Contract(contractABI, contractAddress);
 });
 
-// Example function to register a student
 async function registerStudent() {
-    const accounts = await web3.eth.getAccounts(); // Fetch accounts from Ganache
+    const accounts = await web3.eth.getAccounts();
     const name = document.getElementById("name").value;
     const rollNo = document.getElementById("rollNo").value;
     const semester = document.getElementById("semester").value;
-    const wallet = accounts[0]; // Use the first account from Ganache
+    const wallet = accounts[0];
 
     try {
         await studentRecords.methods.registerStudent(name, rollNo, semester, wallet)
@@ -31,7 +59,6 @@ async function registerStudent() {
     }
 }
 
-// Example function to fetch student info
 async function getStudent() {
     const id = document.getElementById("studentId").value;
 
