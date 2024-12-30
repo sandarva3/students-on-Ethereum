@@ -63,7 +63,7 @@ contract StudentRecords {
         uint sem,
         address key
     ) public onlyOwner returns (uint, bool) {
-        require(checkAddress(key), "The provided wallet key already exist");
+        require(checkWallet(key), "The provided wallet key already exist");
         require(checkRoll(rollno), "Student with given Roll no already exist");
         studentCount++;
 
@@ -86,6 +86,7 @@ contract StudentRecords {
         return (students[id].name, students[id].rollNo, students[id].semester);
     }
 
+    /*
     function getStudentFullInfo(
         uint id
     )
@@ -117,6 +118,20 @@ contract StudentRecords {
             students[id].isRegistered,
             students[id].isDeleted
         );
+    }
+
+*/
+    function getStudentBasicInfo(
+        uint id
+    ) public view onlyOwner checkStudent(id) returns (uint, string memory, uint) {
+        return (students[id].id, students[id].name, students[id].rollNo);
+    }
+
+    function getStudentGrades(
+        uint id,
+        uint sem
+    ) public view onlyOwner checkStudent(id) returns (string memory) {
+        return students[id].grade[sem];
     }
 
     function getWallet(uint id) public view returns (address) {
@@ -203,7 +218,7 @@ contract StudentRecords {
         return (address(stuAddress).balance);
     }
 
-    function checkRoll(uint roll) public view onlyOwner returns (bool) {
+    function checkRoll(uint roll) internal view onlyOwner returns (bool) {
         uint count = 0;
         for (uint i = 1; i <= studentCount; i++) {
             if (students[i].isDeleted == false) {
@@ -219,9 +234,9 @@ contract StudentRecords {
         }
     }
 
-    function checkAddress(
+    function checkWallet(
         address stuAddress
-    ) public view onlyOwner returns (bool) {
+    ) internal view onlyOwner returns (bool) {
         uint count = 0;
         for (uint i = 1; i <= studentCount; i++) {
             if (students[i].isDeleted == false) {
@@ -286,62 +301,52 @@ contract StudentRecords {
         uint count;
         uint index;
 
-
         for (uint i = 1; i <= studentCount; i++) {
-
             if (students[i].isDeleted == false) {
                 uint _sem = students[i].semester;
                 if (_sem == sem) {
                     count += 1;
                 }
             }
-
         }
 
         uint[] memory totalStudents = new uint[](count);
 
-
         for (uint i = 1; i <= studentCount; i++) {
-
             if (students[i].isDeleted == false) {
-            uint _sem = students[i].semester;
-            if (_sem == sem) {
-                totalStudents[index] = i;
-                index += 1;
+                uint _sem = students[i].semester;
+                if (_sem == sem) {
+                    totalStudents[index] = i;
+                    index += 1;
+                }
             }
-            }
-
         }
 
         count = 0;
         index = 0;
 
-
         for (uint i = 0; i < totalStudents.length; i++) {
             uint id = totalStudents[i];
 
             if (students[id].isDeleted == false) {
-            uint _attendance = students[id].attendance[sem];
-            if (_attendance == maxAttendance[sem]) {
-                count += 1;
+                uint _attendance = students[id].attendance[sem];
+                if (_attendance == maxAttendance[sem]) {
+                    count += 1;
+                }
             }
-            }
-
         }
-
 
         uint[] memory boringStudents = new uint[](count);
         for (uint i = 0; i < totalStudents.length; i++) {
             uint id = totalStudents[i];
 
             if (students[i].isDeleted == false) {
-            uint _attendance = students[id].attendance[sem];
-            if (_attendance == maxAttendance[sem]) {
-                boringStudents[index] = id;
-                index += 1;
+                uint _attendance = students[id].attendance[sem];
+                if (_attendance == maxAttendance[sem]) {
+                    boringStudents[index] = id;
+                    index += 1;
+                }
             }
-            }
-
         }
 
         uint totalBorers = boringStudents.length;
@@ -360,13 +365,12 @@ contract StudentRecords {
         return true;
     }
 
-    function deleteStudent(uint id) public onlyOwner checkStudent(id) returns (bool){
+    function deleteStudent(
+        uint id
+    ) public onlyOwner checkStudent(id) returns (bool) {
         students[id].isDeleted = true;
         return true;
     }
-
-
-
 }
 
 library SafeMath {

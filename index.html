@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Records dApp</title>
+    <script src="https://cdn.jsdelivr.net/npm/web3/dist/web3.min.js"></script>
+    <script src="./app.js" defer></script>
+</head>
+<body>
+    <h1>Student Records dApp</h1>
+    <div>
+        <h3>Register Student</h3>
+        <input id="name" type="text" placeholder="Name">
+        <input id="rollNo" type="number" placeholder="Roll No">
+        <input id="semester" type="number" placeholder="Semester">
+        <input id="wallet" type="text" placeholder="Wallet Address">
+        <button onclick="registerStudent()">Register</button>
+    </div>
+    <div>
+        <h3>Get Student Info</h3>
+        <input id="studentId" type="number" placeholder="Student ID">
+        <button onclick="getStudent()">Get Info</button>
+        <p id="studentInfo"></p>
+    </div>
+</body>
+</html>
